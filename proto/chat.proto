@@ -1,0 +1,43 @@
+syntax = "proto3";
+package chat_rpc;
+
+service ChatServer {
+    rpc AlertAvailable (AlertRequest) returns (Empty);
+    rpc SendMessage (ChatRequest) returns (ChatResponse);
+    rpc UpdateUserPosition (UpdateRequest) returns (CloseUsersResponse);
+}
+
+service ChatUser {
+    rpc ReceiveMessage (MessageRequest) returns (Empty);
+}
+
+message Empty { }
+
+message AlertRequest {
+    string username = 1;
+    float latitude = 2;
+    float longitude = 3;
+}
+
+message ChatRequest {
+    string message = 1;
+    string recipient = 2;
+}
+
+message UpdateRequest {
+    float latitude = 1;
+    float longitude = 2;
+}
+
+message MessageRequest {
+    string message = 1;
+}
+
+message ChatResponse {
+    bool successful = 1;
+    string error_msg = 2;
+}
+
+message CloseUsersResponse {
+    repeated string users = 1;
+}
