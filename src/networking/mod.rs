@@ -1,2 +1,4 @@
-pub mod rpc_client;
-pub mod rpc_server;
+pub mod chat_client;
+pub mod chat_server;
+pub mod messages;
+pub mod sockets;

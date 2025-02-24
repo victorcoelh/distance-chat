@@ -1,13 +1,15 @@
+use std::net::SocketAddr;
+
 use crate::types::GeoLocation;
 
 pub struct ClientData {
     pub username: String,
-    pub socket_addr: String,
+    pub socket_addr: SocketAddr,
     pub current_loc: GeoLocation,
 }
 
 impl ClientData {
-    pub fn new(username: String, socket_addr: String, lat: f32, long: f32) -> Self {
+    pub fn new(username: String, socket_addr: SocketAddr, lat: f32, long: f32) -> Self {
         ClientData {
             username,
             socket_addr,

@@ -1,10 +1,11 @@
-use std::collections::HashMap;
-
-use distance_chat::entities::client::ClientData;
+use distance_chat::networking::messages::Message;
 
 fn main() {
-    let mut clients_by_username: HashMap<String, ClientData> = HashMap::new();
+    let chat_msg =
+        Message::ChatMessage("john".to_string(), "carter".to_string(), "hey!".to_string());
 
-    let client = ClientData::new("john".to_string(), "1.1.1.1".to_string());
-    clients_by_username.insert(client.get_username(), client);
+    let encrypted_msg = chat_msg.to_bytes();
+    let decrypted_msg = Message::from_bytes(&encrypted_msg);
+
+    println!("{:?}", decrypted_msg);
 }
