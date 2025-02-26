@@ -1,24 +1,31 @@
+use std::net::SocketAddr;
+
 use crate::types::GeoLocation;
 
 pub const BUFFER_SIZE: usize = 512;
 
 #[derive(Debug)]
 pub enum Message {
-    NewClient(String, GeoLocation),
+    NewClient(String, GeoLocation, SocketAddr),
     UpdatePosition(String, GeoLocation),
     ChatMessage(String, String, String),
+    RefreshClients(String),
 }
 
 impl Message {
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut bytes = match self {
-            Self::NewClient(username, pos) => {
-                format!("{}\n{}\n{}\n{}\n", "0", username, pos.0, pos.1)
+            Self::NewClient(username, pos, client_addr) => {
+                format!(
+                    "{}\n{}\n{}\n{}\n{}\n",
+                    "0", username, pos.0, pos.1, client_addr
+                )
             }
             Self::UpdatePosition(username, pos) => {
                 format!("{}\n{}\n{}\n{}\n", "1", username, pos.0, pos.1)
             }
             Self::ChatMessage(from, to, text) => format!("{}\n{}\n{}\n{}\n", "2", from, to, text),
+            Self::RefreshClients(username) => format!("{}\n{}\n", "3", username),
         }
         .into_bytes();
 
@@ -39,8 +46,11 @@ impl Message {
                 let long = Message::get_string_from_iter(&mut bytes_iter)
                     .parse()
                     .unwrap();
+                let client_addr = Message::get_string_from_iter(&mut bytes_iter)
+                    .parse()
+                    .unwrap();
 
-                Ok(Message::NewClient(username, (lat, long)))
+                Ok(Message::NewClient(username, (lat, long), client_addr))
             }
             b'1' => {
                 let username = Message::get_string_from_iter(&mut bytes_iter);
@@ -59,6 +69,10 @@ impl Message {
                 let text = Message::get_string_from_iter(&mut bytes_iter);
 
                 Ok(Message::ChatMessage(from, to, text))
+            }
+            b'3' => {
+                let username = Message::get_string_from_iter(&mut bytes_iter);
+                Ok(Message::RefreshClients(username))
             }
             _ => panic!("Invalid message type received."),
         }

@@ -1,11 +1,20 @@
-use distance_chat::networking::messages::Message;
+use std::sync::{Arc, Mutex};
 
-fn main() {
-    let chat_msg =
-        Message::ChatMessage("john".to_string(), "carter".to_string(), "hey!".to_string());
+use distance_chat::networking::chat_server::ChatServer;
+use distance_chat::networking::sockets::wait_for_messages;
 
-    let encrypted_msg = chat_msg.to_bytes();
-    let decrypted_msg = Message::from_bytes(&encrypted_msg);
+#[tokio::main]
+async fn main() {
+    let message_queue = Arc::new(Mutex::new(Vec::new()));
+    let mut server = ChatServer::new(message_queue.clone());
 
-    println!("{:?}", decrypted_msg);
+    let thread_queue = message_queue.clone();
+    tokio::spawn(async move {
+        let socket = "127.0.0.1:10690".parse().unwrap();
+        wait_for_messages(thread_queue, socket);
+    });
+
+    loop {
+        server.handle_messages();
+    }
 }
